@@ -9,172 +9,133 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --ink: #0c1220;
-      --paper: #f3f6f4;
-      --mist: #d8e3dc;
-      --pine: #1b4d3e;
-      --pine-deep: #0f2f26;
-      --signal: #c45c26;
-      --line: rgba(12, 18, 32, 0.12);
-      --muted: #5a6b63;
+      --bg: #0c0e12;
+      --panel: #141820;
+      --text: #e8eaef;
+      --muted: #8b93a7;
+      --accent: #3d9a7a;
+      --accent-hover: #4aaf8c;
+      --border: rgba(232, 234, 239, 0.08);
+      --border-strong: rgba(232, 234, 239, 0.14);
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: "DM Sans", system-ui, sans-serif;
-      color: var(--ink);
+      color: var(--text);
       background:
-        radial-gradient(1200px 600px at 80% -10%, rgba(27, 77, 62, 0.18), transparent 55%),
-        radial-gradient(900px 500px at -10% 40%, rgba(196, 92, 38, 0.1), transparent 50%),
-        linear-gradient(180deg, #eef3ef 0%, var(--paper) 40%, #e7eeea 100%);
+        radial-gradient(ellipse 90% 55% at 70% -15%, rgba(61, 154, 122, 0.12), transparent 55%),
+        radial-gradient(ellipse 60% 40% at -10% 60%, rgba(61, 154, 122, 0.05), transparent 50%),
+        var(--bg);
       min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
     }
     a { color: inherit; }
-    .wrap { width: min(1100px, calc(100% - 2.5rem)); margin: 0 auto; }
+    .wrap { width: min(960px, calc(100% - 2.5rem)); margin: 0 auto; }
     nav {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 1.25rem 0;
+      padding: 1.5rem 0;
+      border-bottom: 1px solid var(--border);
     }
     .brand {
       font-weight: 700;
       letter-spacing: -0.03em;
       font-size: 1.05rem;
     }
-    .brand span { color: var(--pine); }
-    .nav-links { display: flex; gap: 1.25rem; align-items: center; font-size: 0.92rem; }
-    .nav-links a { text-decoration: none; color: var(--muted); }
-    .nav-links a:hover { color: var(--ink); }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 1.25rem; align-items: center; font-size: 0.9rem; }
+    .nav-links a { text-decoration: none; color: var(--muted); transition: color 0.15s ease; }
+    .nav-links a:hover { color: var(--text); }
     .btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 0.4rem;
       text-decoration: none;
       border-radius: 8px;
-      padding: 0.7rem 1.15rem;
+      padding: 0.7rem 1.2rem;
       font-weight: 600;
-      font-size: 0.95rem;
+      font-size: 0.925rem;
       border: 1px solid transparent;
-      transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+      transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
     }
     .btn:hover { transform: translateY(-1px); }
-    .btn-primary { background: var(--pine); color: #f4faf7; }
-    .btn-primary:hover { background: var(--pine-deep); }
-    .btn-ghost { background: transparent; border-color: var(--line); color: var(--ink); }
+    .btn-primary { background: var(--accent); color: #0a0c10; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-ghost { background: transparent; border-color: var(--border-strong); color: var(--text); }
+    .btn-ghost:hover { border-color: var(--muted); }
     .hero {
-      padding: 3.5rem 0 4.5rem;
-      display: grid;
-      gap: 2rem;
-      align-items: end;
+      padding: 4.5rem 0 3.5rem;
+      animation: fadeup 0.7s ease both;
     }
-    @media (min-width: 900px) {
-      .hero { grid-template-columns: 1.05fr 0.95fr; min-height: calc(100vh - 5.5rem); padding-top: 2rem; }
-    }
-    .hero-copy h1 {
-      margin: 0.35rem 0 0.85rem;
-      font-size: clamp(2.4rem, 5vw, 3.6rem);
-      line-height: 1.05;
-      letter-spacing: -0.045em;
-      max-width: 11ch;
-    }
-    .hero-copy .product {
-      font-size: 0.8rem;
+    .hero .product {
+      font-size: 0.75rem;
       font-weight: 600;
-      letter-spacing: 0.14em;
+      letter-spacing: 0.16em;
       text-transform: uppercase;
-      color: var(--pine);
+      color: var(--accent);
+      margin-bottom: 1rem;
     }
-    .hero-copy p {
-      margin: 0 0 1.5rem;
-      color: var(--muted);
-      font-size: 1.08rem;
-      line-height: 1.55;
-      max-width: 36ch;
+    .hero h1 {
+      margin: 0 0 1rem;
+      font-size: clamp(2.35rem, 5.5vw, 3.5rem);
+      line-height: 1.08;
+      letter-spacing: -0.045em;
+      font-weight: 700;
+      max-width: 14ch;
     }
-    .cta-row { display: flex; flex-wrap: wrap; gap: 0.75rem; }
-    .hero-visual {
-      position: relative;
-      min-height: 320px;
-      border-radius: 18px;
-      overflow: hidden;
-      background:
-        linear-gradient(145deg, #12352c 0%, #1b4d3e 45%, #0c1220 100%);
-      color: #e8f2ec;
-      box-shadow: 0 30px 60px rgba(15, 47, 38, 0.25);
-      animation: rise 0.9s ease both;
-    }
-    .hero-visual::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background:
-        repeating-linear-gradient(
-          -12deg,
-          transparent,
-          transparent 14px,
-          rgba(255,255,255,0.03) 14px,
-          rgba(255,255,255,0.03) 15px
-        );
-    }
-    .terminal {
-      position: relative;
-      padding: 1.4rem 1.35rem 1.5rem;
-      font-family: "JetBrains Mono", ui-monospace, monospace;
-      font-size: 0.78rem;
-      line-height: 1.55;
-    }
-    .terminal .bar {
-      display: flex; gap: 0.35rem; margin-bottom: 1rem;
-    }
-    .terminal .dot {
-      width: 9px; height: 9px; border-radius: 50%;
-      background: rgba(255,255,255,0.25);
-    }
-    .terminal .fail { color: #ff8f7a; }
-    .terminal .ok { color: #7ddeb0; }
-    .terminal .dim { color: rgba(232,242,236,0.55); }
-    .terminal .hi { color: #f0c27a; }
-    @keyframes rise {
-      from { opacity: 0; transform: translateY(18px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes fadeup {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .hero-copy { animation: fadeup 0.7s ease both; }
-    section.block { padding: 3.5rem 0; border-top: 1px solid var(--line); }
-    section.block h2 {
-      margin: 0 0 0.6rem;
-      font-size: clamp(1.6rem, 3vw, 2rem);
-      letter-spacing: -0.03em;
-    }
-    section.block > .lede {
+    .hero .lede {
       margin: 0 0 1.75rem;
       color: var(--muted);
-      max-width: 48ch;
-      line-height: 1.5;
+      font-size: 1.1rem;
+      line-height: 1.55;
+      max-width: 42ch;
     }
-    .split {
+    .cta-row { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+    .features {
+      padding: 2.5rem 0 4rem;
+      border-top: 1px solid var(--border);
       display: grid;
       gap: 1.25rem;
     }
-    @media (min-width: 800px) { .split { grid-template-columns: 1fr 1fr; } }
-    .point h3 { margin: 0 0 0.4rem; font-size: 1.05rem; }
-    .point p { margin: 0; color: var(--muted); line-height: 1.5; }
+    @media (min-width: 720px) {
+      .features { grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+    }
+    .feature {
+      padding: 1.35rem 1.25rem;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+    .feature h3 {
+      margin: 0 0 0.5rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+    .feature p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
     footer {
-      border-top: 1px solid var(--line);
+      border-top: 1px solid var(--border);
       padding: 1.5rem 0 2.5rem;
       display: flex;
       flex-wrap: wrap;
       gap: 1rem;
       justify-content: space-between;
       color: var(--muted);
-      font-size: 0.88rem;
+      font-size: 0.85rem;
     }
-    footer a { color: var(--muted); }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--text); }
+    @keyframes fadeup {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 <body>
@@ -182,69 +143,39 @@
     <nav>
       <div class="brand">CI <span>Intelligence</span></div>
       <div class="nav-links">
-        <a href="#problem">Problem</a>
-        <a href="#how">How it works</a>
+        <a href="#features">Features</a>
         <a href="/legal/terms">Terms</a>
         <a class="btn btn-primary" href="/app">Open app</a>
       </div>
     </nav>
 
     <header class="hero">
-      <div class="hero-copy">
-        <div class="product">CI Intelligence</div>
-        <h1>Know why CI failed — and if it will again.</h1>
-        <p>Deterministic failure fingerprints and flaky-test scoring first. AI only narrates evidence you can verify.</p>
-        <div class="cta-row">
-          <a class="btn btn-primary" href="/app">Try the product</a>
-          <a class="btn btn-ghost" href="#how">How it works</a>
-        </div>
-      </div>
-      <div class="hero-visual" aria-hidden="true">
-        <div class="terminal">
-          <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
-          <div class="dim">$ POST /explain/run-1002</div>
-          <div class="fail">conclusion: failure</div>
-          <div>signature: <span class="hi">timeout·payments·charge</span></div>
-          <div class="dim">seen 7× · first 2026-02-18 · last today</div>
-          <div class="ok">flaky score: LOW — real break on sha a1b2c3d</div>
-          <div class="dim">evidence[0]: step “Run pytest” exit 1</div>
-          <div>ai: cites fingerprints only — no free-form guesswork</div>
-        </div>
+      <div class="product">CI Intelligence</div>
+      <h1>Know why CI failed — and if it will again.</h1>
+      <p class="lede">Deterministic failure fingerprints and flaky-test scoring first. AI only narrates evidence you can verify.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="/app">Open app</a>
+        <a class="btn btn-ghost" href="#features">See features</a>
       </div>
     </header>
 
-    <section class="block" id="problem">
-      <h2>Red builds waste hours. Status boards don’t explain them.</h2>
-      <p class="lede">Engineers re-read logs, argue about flakes, and lose merge confidence. Dashboards answer green/red — not causality or recurrence.</p>
-      <div class="split">
-        <div class="point">
-          <h3>Same failure, new noise</h3>
-          <p>Timestamps, UUIDs, and line numbers change every run. Without fingerprints, recurrence stays tribal knowledge.</p>
-        </div>
-        <div class="point">
-          <h3>Flake vs real break</h3>
-          <p>Same-SHA pass/fail contradictions and retry recoveries are scored so on-call stops guessing.</p>
-        </div>
+    <section class="features" id="features">
+      <div class="feature">
+        <h3>Failure fingerprints</h3>
+        <p>Cluster the same break across noisy logs so recurrence is visible, not tribal knowledge.</p>
       </div>
-    </section>
-
-    <section class="block" id="how">
-      <h2>Solution: cluster → score → explain with citations</h2>
-      <p class="lede">Ingest workflow runs, group failure signatures, surface flaky tests, then explain a run with a deterministic summary and evidence-backed narrative.</p>
-      <div class="split">
-        <div class="point">
-          <h3>Multi-user ready</h3>
-          <p>Orgs and API tokens for shared triage. Sign up or use Bearer token <code>demo</code> for local eval.</p>
-        </div>
-        <div class="point">
-          <h3>Local in minutes</h3>
-          <p>Load sample fixtures, inspect clusters and flakes, and call <code>POST /explain/{run_id}</code> against a real dashboard.</p>
-        </div>
+      <div class="feature">
+        <h3>Flake vs real break</h3>
+        <p>Same-SHA contradictions and retry recoveries are scored so on-call stops guessing.</p>
+      </div>
+      <div class="feature">
+        <h3>Evidence-cited explain</h3>
+        <p>Deterministic summary first; AI narrative cites fingerprints only — no free-form guesswork.</p>
       </div>
     </section>
 
     <footer>
-      <div>© 2026 CI Intelligence — production-ready analysis tool</div>
+      <div>© 2026 CI Intelligence</div>
       <div>
         <a href="/legal/terms">Terms</a>
         ·

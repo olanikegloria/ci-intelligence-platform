@@ -4,183 +4,257 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>CI Intelligence Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #0f1419;
-      --panel: #1a2332;
-      --border: #2a3a4f;
-      --text: #e7eef7;
-      --muted: #8b9bb0;
-      --accent: #3d9cf0;
-      --fail: #e85d5d;
-      --ok: #3ecf8e;
-      --warn: #e6b84d;
+      --bg: #0c0e12;
+      --panel: #141820;
+      --border: rgba(232, 234, 239, 0.1);
+      --border-strong: rgba(232, 234, 239, 0.16);
+      --text: #e8eaef;
+      --muted: #8b93a7;
+      --accent: #3d9a7a;
+      --accent-hover: #4aaf8c;
+      --fail: #e07a6e;
+      --ok: #3d9a7a;
+      --warn: #c9a227;
+      --input: #0a0c10;
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
-      background: radial-gradient(ellipse at top, #1a2740 0%, var(--bg) 55%);
+      font-family: "DM Sans", system-ui, sans-serif;
+      background:
+        radial-gradient(ellipse 80% 45% at 50% -15%, rgba(61, 154, 122, 0.08), transparent),
+        var(--bg);
       color: var(--text);
       min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
     }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin: 0 auto; }
     header {
-      padding: 1.5rem 2rem 0.5rem;
+      padding: 1.75rem 0 1.25rem;
       border-bottom: 1px solid var(--border);
     }
-    header h1 { margin: 0; font-size: 1.4rem; letter-spacing: -0.02em; }
-    header p { margin: 0.35rem 0 1rem; color: var(--muted); font-size: 0.95rem; }
-    .actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    header h1 {
+      margin: 0;
+      font-size: 1.35rem;
+      letter-spacing: -0.03em;
+      font-weight: 700;
+    }
+    header p { margin: 0.4rem 0 1.1rem; color: var(--muted); font-size: 0.925rem; }
+    .actions { display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center; }
+    .actions a.nav {
+      color: var(--muted);
+      font-size: 0.875rem;
+      text-decoration: none;
+      margin-right: 0.25rem;
+    }
+    .actions a.nav:hover { color: var(--text); }
     button {
       background: var(--accent);
-      color: #061018;
+      color: #0a0c10;
       border: none;
-      border-radius: 6px;
-      padding: 0.5rem 0.9rem;
+      border-radius: 8px;
+      padding: 0.5rem 0.95rem;
       font-weight: 600;
+      font-size: 0.875rem;
+      font-family: inherit;
       cursor: pointer;
+      transition: background 0.15s ease;
     }
-    button.secondary { background: transparent; color: var(--text); border: 1px solid var(--border); }
+    button:hover { background: var(--accent-hover); }
+    button.secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border-strong);
+    }
+    button.secondary:hover { border-color: var(--muted); background: transparent; }
+    button:disabled { opacity: 0.55; cursor: not-allowed; }
+    label.token {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+    label.token input {
+      background: var(--input);
+      border: 1px solid var(--border-strong);
+      color: var(--text);
+      border-radius: 6px;
+      padding: 0.35rem 0.55rem;
+      width: 9rem;
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-size: 0.8rem;
+    }
+    label.token input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
     main {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 1rem;
-      padding: 1rem 2rem 2rem;
+      padding: 1.25rem 0 2.5rem;
     }
     @media (max-width: 960px) { main { grid-template-columns: 1fr; } }
     section {
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 1rem 1.1rem;
-      min-height: 220px;
+      padding: 1.1rem 1.2rem;
+      min-height: 200px;
     }
     section.full { grid-column: 1 / -1; }
-    h2 { margin: 0 0 0.75rem; font-size: 1rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
-    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
-    th, td { text-align: left; padding: 0.45rem 0.35rem; border-bottom: 1px solid var(--border); vertical-align: top; }
-    th { color: var(--muted); font-weight: 500; }
+    h2 {
+      margin: 0 0 0.85rem;
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 600;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    th, td {
+      text-align: left;
+      padding: 0.5rem 0.4rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    th { color: var(--muted); font-weight: 500; font-size: 0.75rem; }
     .badge {
       display: inline-block;
-      padding: 0.12rem 0.45rem;
+      padding: 0.15rem 0.5rem;
       border-radius: 4px;
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 700;
+      letter-spacing: 0.02em;
     }
-    .fail { background: rgba(232,93,93,0.2); color: var(--fail); }
-    .ok { background: rgba(62,207,142,0.15); color: var(--ok); }
-    .high { background: rgba(232,93,93,0.2); color: var(--fail); }
-    .med { background: rgba(230,184,77,0.2); color: var(--warn); }
-    .low { background: rgba(62,207,142,0.15); color: var(--ok); }
-    .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.8rem; }
+    .fail { background: rgba(224, 122, 110, 0.15); color: var(--fail); }
+    .ok { background: rgba(61, 154, 122, 0.15); color: var(--ok); }
+    .high { background: rgba(224, 122, 110, 0.15); color: var(--fail); }
+    .med { background: rgba(201, 162, 39, 0.15); color: var(--warn); }
+    .low { background: rgba(61, 154, 122, 0.15); color: var(--ok); }
+    .mono { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 0.78rem; }
     #explain-panel pre {
       white-space: pre-wrap;
-      background: #0c121a;
+      background: var(--input);
       border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 0.9rem;
-      font-size: 0.85rem;
-      line-height: 1.45;
+      padding: 0.95rem;
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-size: 0.8rem;
+      line-height: 1.5;
       margin: 0;
+      color: var(--text);
     }
     tr.clickable { cursor: pointer; }
-    tr.clickable:hover { background: rgba(61,156,240,0.08); }
-    tr.selected { background: rgba(61,156,240,0.14); }
-    .empty { color: var(--muted); font-size: 0.9rem; }
+    tr.clickable:hover { background: rgba(61, 154, 122, 0.06); }
+    tr.selected { background: rgba(61, 154, 122, 0.12); }
+    .empty { color: var(--muted); font-size: 0.9rem; margin: 0; }
+    .status { font-size: 0.85rem; color: var(--muted); margin: 0 0 0.5rem; }
+    .status.err { color: var(--fail); }
+    .status.busy { color: var(--accent); }
   </style>
 </head>
 <body>
-  <header>
-    <h1>CI Intelligence Platform</h1>
-    <p>Failure clusters · flaky tests · evidence-cited explanations (deterministic first)</p>
-    <div class="actions">
-      <a href="/" style="color:var(--muted);align-self:center;font-size:0.9rem;text-decoration:none">← Marketing</a>
-      <button type="button" onclick="ingestSample()">Reload sample fixtures</button>
-      <button type="button" class="secondary" onclick="location.reload()">Refresh</button>
-      <label style="align-self:center;color:var(--muted);font-size:0.85rem">
-        API token
-        <input id="api-token" type="text" value="demo" style="margin-left:0.35rem;background:#0c121a;border:1px solid var(--border);color:var(--text);border-radius:4px;padding:0.25rem 0.45rem;width:9rem" />
-      </label>
-    </div>
-  </header>
-  <main>
-    <section>
-      <h2>Workflow runs</h2>
-      {% if runs %}
-      <table>
-        <thead>
-          <tr><th>ID</th><th>Workflow</th><th>Branch</th><th>Result</th><th></th></tr>
-        </thead>
-        <tbody>
-          {% for r in runs %}
-          <tr class="clickable" id="run-{{ r.id }}" onclick="selectRun('{{ r.id }}')">
-            <td class="mono">{{ r.id }}</td>
-            <td>{{ r.workflow_name }}</td>
-            <td class="mono">{{ r.branch }}@{{ r.commit_sha[:7] }}</td>
-            <td><span class="badge {{ 'ok' if r.conclusion == 'success' else 'fail' }}">{{ r.conclusion }}</span></td>
-            <td><button type="button" class="secondary" onclick="event.stopPropagation(); explainRun('{{ r.id }}')">Explain</button></td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      {% else %}
-      <p class="empty">No runs. Click “Reload sample fixtures”.</p>
-      {% endif %}
-    </section>
+  <div class="shell">
+    <header>
+      <h1>CI Intelligence</h1>
+      <p>Failure clusters · flaky tests · evidence-cited explanations</p>
+      <div class="actions">
+        <a class="nav" href="/">← Landing</a>
+        <button type="button" id="btn-ingest" onclick="ingestSample()">Reload sample fixtures</button>
+        <button type="button" class="secondary" onclick="location.reload()">Refresh</button>
+        <label class="token">
+          API token
+          <input id="api-token" type="text" value="demo" autocomplete="off" />
+        </label>
+      </div>
+    </header>
+    <main>
+      <section>
+        <h2>Workflow runs</h2>
+        {% if runs %}
+        <table>
+          <thead>
+            <tr><th>ID</th><th>Workflow</th><th>Branch</th><th>Result</th><th></th></tr>
+          </thead>
+          <tbody>
+            {% for r in runs %}
+            <tr class="clickable" id="run-{{ r.id }}" onclick="selectRun('{{ r.id }}')">
+              <td class="mono">{{ r.id }}</td>
+              <td>{{ r.workflow_name }}</td>
+              <td class="mono">{{ r.branch }}@{{ r.commit_sha[:7] }}</td>
+              <td><span class="badge {{ 'ok' if r.conclusion == 'success' else 'fail' }}">{{ r.conclusion }}</span></td>
+              <td><button type="button" class="secondary" onclick="event.stopPropagation(); explainRun('{{ r.id }}')">Explain</button></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <p class="empty">No runs. Click “Reload sample fixtures”.</p>
+        {% endif %}
+      </section>
 
-    <section>
-      <h2>Failure clusters</h2>
-      {% if clusters %}
-      <table>
-        <thead>
-          <tr><th>Fingerprint</th><th>Count</th><th>First / Last</th><th>Sample</th></tr>
-        </thead>
-        <tbody>
-          {% for c in clusters %}
-          <tr>
-            <td class="mono">{{ c.fingerprint }}</td>
-            <td>{{ c.count }}</td>
-            <td class="mono">{{ c.first_seen[:10] }} → {{ c.last_seen[:10] }}</td>
-            <td>{{ c.sample_message[:90] }}{% if c.sample_message|length > 90 %}…{% endif %}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      {% else %}
-      <p class="empty">No failure signatures yet.</p>
-      {% endif %}
-    </section>
+      <section>
+        <h2>Failure clusters</h2>
+        {% if clusters %}
+        <table>
+          <thead>
+            <tr><th>Fingerprint</th><th>Count</th><th>First / Last</th><th>Sample</th></tr>
+          </thead>
+          <tbody>
+            {% for c in clusters %}
+            <tr>
+              <td class="mono">{{ c.fingerprint }}</td>
+              <td>{{ c.count }}</td>
+              <td class="mono">{{ c.first_seen[:10] }} → {{ c.last_seen[:10] }}</td>
+              <td>{{ c.sample_message[:90] }}{% if c.sample_message|length > 90 %}…{% endif %}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <p class="empty">No failure signatures yet.</p>
+        {% endif %}
+      </section>
 
-    <section>
-      <h2>Flaky tests</h2>
-      {% if flaky %}
-      <table>
-        <thead>
-          <tr><th>Test</th><th>Risk</th><th>Score</th><th>P/F</th><th>Same-SHA</th></tr>
-        </thead>
-        <tbody>
-          {% for t in flaky %}
-          <tr>
-            <td>{{ t.name }}</td>
-            <td><span class="badge {{ t.risk|lower }}">{{ t.risk }}</span></td>
-            <td>{{ t.score }}</td>
-            <td>{{ t.pass_count }}/{{ t.fail_count }}</td>
-            <td>{{ t.same_sha_contradictions }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      {% else %}
-      <p class="empty">No flaky signals detected.</p>
-      {% endif %}
-    </section>
+      <section>
+        <h2>Flaky tests</h2>
+        {% if flaky %}
+        <table>
+          <thead>
+            <tr><th>Test</th><th>Risk</th><th>Score</th><th>P/F</th><th>Same-SHA</th></tr>
+          </thead>
+          <tbody>
+            {% for t in flaky %}
+            <tr>
+              <td>{{ t.name }}</td>
+              <td><span class="badge {{ t.risk|lower }}">{{ t.risk }}</span></td>
+              <td>{{ t.score }}</td>
+              <td>{{ t.pass_count }}/{{ t.fail_count }}</td>
+              <td>{{ t.same_sha_contradictions }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <p class="empty">No flaky signals detected.</p>
+        {% endif %}
+      </section>
 
-    <section id="explain-panel">
-      <h2>Explain panel</h2>
-      <p class="empty" id="explain-hint">Select a run and click Explain.</p>
-      <pre id="explain-out" hidden></pre>
-    </section>
-  </main>
+      <section id="explain-panel">
+        <h2>Explain panel</h2>
+        <p class="status" id="explain-status" hidden></p>
+        <p class="empty" id="explain-hint">Select a run and click Explain.</p>
+        <pre id="explain-out" hidden></pre>
+      </section>
+    </main>
+  </div>
   <script>
     function apiToken() {
       const el = document.getElementById('api-token');
@@ -192,10 +266,24 @@
       return h;
     }
     async function ingestSample() {
-      const res = await fetch('/ingest/sample', { method: 'POST' });
-      const data = await res.json();
-      alert('Ingested ' + data.ingested + ' runs');
-      location.reload();
+      const btn = document.getElementById('btn-ingest');
+      btn.disabled = true;
+      btn.textContent = 'Ingesting…';
+      try {
+        const res = await fetch('/ingest/sample', { method: 'POST' });
+        const data = await res.json();
+        if (!res.ok) {
+          alert('Ingest failed: ' + (data.detail || res.status));
+          return;
+        }
+        alert('Ingested ' + data.ingested + ' runs');
+        location.reload();
+      } catch (e) {
+        alert('Ingest failed: network error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Reload sample fixtures';
+      }
     }
     function selectRun(id) {
       document.querySelectorAll('tr.clickable').forEach(el => el.classList.remove('selected'));
@@ -204,29 +292,44 @@
     }
     async function explainRun(id) {
       selectRun(id);
-      const res = await fetch('/explain/' + id, { method: 'POST', headers: authHeaders() });
-      const data = await res.json();
-      if (!res.ok) {
-        alert('Explain failed: ' + res.status + '\n' + JSON.stringify(data.detail || data, null, 2));
-        return;
-      }
-      const lines = [
-        '=== Deterministic summary ===',
-        data.deterministic_summary,
-        '',
-        '=== Related signatures ===',
-        (data.related_signatures || []).join(', ') || '(none)',
-        '',
-        '=== Evidence ===',
-        JSON.stringify(data.evidence, null, 2),
-        '',
-        '=== AI explanation (stub) ===',
-        data.ai_explanation || '(none)',
-      ];
-      document.getElementById('explain-hint').hidden = true;
+      const hint = document.getElementById('explain-hint');
       const out = document.getElementById('explain-out');
-      out.hidden = false;
-      out.textContent = lines.join('\n');
+      const status = document.getElementById('explain-status');
+      hint.hidden = true;
+      out.hidden = true;
+      status.hidden = false;
+      status.className = 'status busy';
+      status.textContent = 'Loading explanation…';
+      try {
+        const res = await fetch('/explain/' + id, { method: 'POST', headers: authHeaders() });
+        const data = await res.json();
+        if (!res.ok) {
+          status.className = 'status err';
+          status.textContent = 'Explain failed: ' + res.status;
+          out.hidden = false;
+          out.textContent = JSON.stringify(data.detail || data, null, 2);
+          return;
+        }
+        status.hidden = true;
+        const lines = [
+          '=== Deterministic summary ===',
+          data.deterministic_summary,
+          '',
+          '=== Related signatures ===',
+          (data.related_signatures || []).join(', ') || '(none)',
+          '',
+          '=== Evidence ===',
+          JSON.stringify(data.evidence, null, 2),
+          '',
+          '=== AI explanation (stub) ===',
+          data.ai_explanation || '(none)',
+        ];
+        out.hidden = false;
+        out.textContent = lines.join('\n');
+      } catch (e) {
+        status.className = 'status err';
+        status.textContent = 'Explain failed: network error';
+      }
     }
   </script>
 </body>
