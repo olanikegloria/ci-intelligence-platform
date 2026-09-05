@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Privacy Policy — CI Intelligence</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "DM Sans", "Segoe UI", system-ui, sans-serif;
+      background: #f3f6f4;
+      color: #0c1220;
+      line-height: 1.55;
+    }
+    main { width: min(720px, calc(100% - 2rem)); margin: 2rem auto 3rem; }
+    a { color: #1b4d3e; }
+    h1 { letter-spacing: -0.03em; }
+    p, li { color: #3d4a44; }
+    .muted { color: #5a6b63; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <main>
+    <p><a href="/">← CI Intelligence</a></p>
+    <h1>Privacy Policy</h1>
+    <p class="muted">Stub — last updated September 5, 2026. Not legal advice.</p>
+    <p>
+      This policy describes how CI Intelligence handles information in the current foundation build.
+    </p>
+    <h2>Data we store</h2>
+    <ul>
+      <li><strong>Account data:</strong> email, password hash, organization name, plan, API tokens.</li>
+      <li><strong>Usage metering:</strong> explain counts per organization per calendar month.</li>
+      <li><strong>CI analysis data:</strong> workflow run payloads you ingest (jobs, steps, test results, messages).</li>
+    </ul>
+    <h2>Storage</h2>
+    <p>
+      Local / self-hosted deployments persist JSON under the configured <code>DATA_DIR</code>
+      (for example <code>data/store.json</code> and <code>data/accounts.json</code>).
+      Production deployments should use encrypted storage, access controls, and retention policies.
+    </p>
+    <h2>Sharing</h2>
+    <p>
+      We do not sell personal data. Payment processing (when enabled) is handled by Stripe under their terms.
+      The demo Bearer token <code>demo</code> is for local evaluation only and must not be used in production.
+    </p>
+    <h2>Your choices</h2>
+    <p>
+      Contact the operator of your deployment to request account deletion or export.
+      Replace this stub with a counsel-reviewed privacy policy before processing customer PII in production.
+    </p>
+  </main>
+</body>
+</html>

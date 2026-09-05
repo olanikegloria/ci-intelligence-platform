@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CI Intelligence — Know why CI failed</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #0c1220;
+      --paper: #f3f6f4;
+      --mist: #d8e3dc;
+      --pine: #1b4d3e;
+      --pine-deep: #0f2f26;
+      --signal: #c45c26;
+      --line: rgba(12, 18, 32, 0.12);
+      --muted: #5a6b63;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "DM Sans", system-ui, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 600px at 80% -10%, rgba(27, 77, 62, 0.18), transparent 55%),
+        radial-gradient(900px 500px at -10% 40%, rgba(196, 92, 38, 0.1), transparent 50%),
+        linear-gradient(180deg, #eef3ef 0%, var(--paper) 40%, #e7eeea 100%);
+      min-height: 100vh;
+    }
+    a { color: inherit; }
+    .wrap { width: min(1100px, calc(100% - 2.5rem)); margin: 0 auto; }
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 0;
+    }
+    .brand {
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      font-size: 1.05rem;
+    }
+    .brand span { color: var(--pine); }
+    .nav-links { display: flex; gap: 1.25rem; align-items: center; font-size: 0.92rem; }
+    .nav-links a { text-decoration: none; color: var(--muted); }
+    .nav-links a:hover { color: var(--ink); }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      text-decoration: none;
+      border-radius: 8px;
+      padding: 0.7rem 1.15rem;
+      font-weight: 600;
+      font-size: 0.95rem;
+      border: 1px solid transparent;
+      transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn-primary { background: var(--pine); color: #f4faf7; }
+    .btn-primary:hover { background: var(--pine-deep); }
+    .btn-ghost { background: transparent; border-color: var(--line); color: var(--ink); }
+    .hero {
+      padding: 3.5rem 0 4.5rem;
+      display: grid;
+      gap: 2rem;
+      align-items: end;
+    }
+    @media (min-width: 900px) {
+      .hero { grid-template-columns: 1.05fr 0.95fr; min-height: calc(100vh - 5.5rem); padding-top: 2rem; }
+    }
+    .hero-copy h1 {
+      margin: 0.35rem 0 0.85rem;
+      font-size: clamp(2.4rem, 5vw, 3.6rem);
+      line-height: 1.05;
+      letter-spacing: -0.045em;
+      max-width: 11ch;
+    }
+    .hero-copy .product {
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--pine);
+    }
+    .hero-copy p {
+      margin: 0 0 1.5rem;
+      color: var(--muted);
+      font-size: 1.08rem;
+      line-height: 1.55;
+      max-width: 36ch;
+    }
+    .cta-row { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+    .hero-visual {
+      position: relative;
+      min-height: 320px;
+      border-radius: 18px;
+      overflow: hidden;
+      background:
+        linear-gradient(145deg, #12352c 0%, #1b4d3e 45%, #0c1220 100%);
+      color: #e8f2ec;
+      box-shadow: 0 30px 60px rgba(15, 47, 38, 0.25);
+      animation: rise 0.9s ease both;
+    }
+    .hero-visual::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(
+          -12deg,
+          transparent,
+          transparent 14px,
+          rgba(255,255,255,0.03) 14px,
+          rgba(255,255,255,0.03) 15px
+        );
+    }
+    .terminal {
+      position: relative;
+      padding: 1.4rem 1.35rem 1.5rem;
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-size: 0.78rem;
+      line-height: 1.55;
+    }
+    .terminal .bar {
+      display: flex; gap: 0.35rem; margin-bottom: 1rem;
+    }
+    .terminal .dot {
+      width: 9px; height: 9px; border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+    }
+    .terminal .fail { color: #ff8f7a; }
+    .terminal .ok { color: #7ddeb0; }
+    .terminal .dim { color: rgba(232,242,236,0.55); }
+    .terminal .hi { color: #f0c27a; }
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeup {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .hero-copy { animation: fadeup 0.7s ease both; }
+    section.block { padding: 3.5rem 0; border-top: 1px solid var(--line); }
+    section.block h2 {
+      margin: 0 0 0.6rem;
+      font-size: clamp(1.6rem, 3vw, 2rem);
+      letter-spacing: -0.03em;
+    }
+    section.block > .lede {
+      margin: 0 0 1.75rem;
+      color: var(--muted);
+      max-width: 48ch;
+      line-height: 1.5;
+    }
+    .split {
+      display: grid;
+      gap: 1.25rem;
+    }
+    @media (min-width: 800px) { .split { grid-template-columns: 1fr 1fr; } }
+    .point h3 { margin: 0 0 0.4rem; font-size: 1.05rem; }
+    .point p { margin: 0; color: var(--muted); line-height: 1.5; }
+    .pricing {
+      display: grid;
+      gap: 1rem;
+    }
+    @media (min-width: 860px) { .pricing { grid-template-columns: repeat(3, 1fr); } }
+    .plan {
+      padding: 1.35rem 1.25rem 1.45rem;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.55);
+      backdrop-filter: blur(6px);
+      transition: border-color 0.25s ease, transform 0.25s ease;
+    }
+    .plan:hover { border-color: rgba(27,77,62,0.35); transform: translateY(-3px); }
+    .plan.featured {
+      background: var(--pine);
+      color: #f4faf7;
+      border-color: transparent;
+    }
+    .plan.featured p, .plan.featured li { color: rgba(244,250,247,0.82); }
+    .plan h3 { margin: 0; font-size: 1.1rem; }
+    .price {
+      margin: 0.7rem 0 0.85rem;
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.04em;
+    }
+    .price small { font-size: 0.95rem; font-weight: 500; opacity: 0.75; }
+    .plan ul {
+      margin: 0 0 1.2rem;
+      padding-left: 1.1rem;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 0.92rem;
+    }
+    .plan.featured .btn-primary {
+      background: #f4faf7;
+      color: var(--pine-deep);
+    }
+    footer {
+      border-top: 1px solid var(--line);
+      padding: 1.5rem 0 2.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+    footer a { color: var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <nav>
+      <div class="brand">CI <span>Intelligence</span></div>
+      <div class="nav-links">
+        <a href="#problem">Problem</a>
+        <a href="#pricing">Pricing</a>
+        <a href="/legal/terms">Terms</a>
+        <a class="btn btn-primary" href="/app">Open app</a>
+      </div>
+    </nav>
+
+    <header class="hero">
+      <div class="hero-copy">
+        <div class="product">CI Intelligence</div>
+        <h1>Know why CI failed — and if it will again.</h1>
+        <p>Deterministic failure fingerprints and flaky-test scoring first. AI only narrates evidence you can verify.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="/app">Try the product</a>
+          <a class="btn btn-ghost" href="#pricing">See pricing</a>
+        </div>
+      </div>
+      <div class="hero-visual" aria-hidden="true">
+        <div class="terminal">
+          <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+          <div class="dim">$ POST /explain/run-1002</div>
+          <div class="fail">conclusion: failure</div>
+          <div>signature: <span class="hi">timeout·payments·charge</span></div>
+          <div class="dim">seen 7× · first 2026-02-18 · last today</div>
+          <div class="ok">flaky score: LOW — real break on sha a1b2c3d</div>
+          <div class="dim">evidence[0]: step “Run pytest” exit 1</div>
+          <div>ai: cites fingerprints only — no free-form guesswork</div>
+        </div>
+      </div>
+    </header>
+
+    <section class="block" id="problem">
+      <h2>Red builds waste hours. Status boards don’t explain them.</h2>
+      <p class="lede">Engineers re-read logs, argue about flakes, and lose merge confidence. Dashboards answer green/red — not causality or recurrence.</p>
+      <div class="split">
+        <div class="point">
+          <h3>Same failure, new noise</h3>
+          <p>Timestamps, UUIDs, and line numbers change every run. Without fingerprints, recurrence stays tribal knowledge.</p>
+        </div>
+        <div class="point">
+          <h3>Flake vs real break</h3>
+          <p>Same-SHA pass/fail contradictions and retry recoveries are scored so on-call stops guessing.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2>Solution: cluster → score → explain with citations</h2>
+      <p class="lede">Ingest workflow runs, group failure signatures, surface flaky tests, then explain a run with a deterministic summary and evidence-backed narrative.</p>
+      <div class="split">
+        <div class="point">
+          <h3>Built for the buying conversation</h3>
+          <p>Orgs, API tokens, Free-tier metering (50 explains/mo), and a Stripe checkout stub so the upgrade path is demoable today.</p>
+        </div>
+        <div class="point">
+          <h3>Local eval in minutes</h3>
+          <p>Use Bearer token <code>demo</code> against protected APIs, or sign up for a Free org and walk the full commercial loop.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="pricing">
+      <h2>Simple plans for squads that ship</h2>
+      <p class="lede">Seat and repo limits match how reliability work is actually shared. See docs/PRICING.md in the repo for the full narrative.</p>
+      <div class="pricing">
+        <article class="plan">
+          <h3>Free</h3>
+          <div class="price">$0</div>
+          <ul>
+            <li>1 seat · 1 repo</li>
+            <li>50 explains / month</li>
+            <li>Clusters + flaky scoring</li>
+          </ul>
+          <a class="btn btn-ghost" href="/app">Start free</a>
+        </article>
+        <article class="plan featured">
+          <h3>Team</h3>
+          <div class="price">$49 <small>/ mo</small></div>
+          <ul>
+            <li>Up to 10 seats · 5 repos</li>
+            <li>2,000 explains / month</li>
+            <li>Email support</li>
+          </ul>
+          <a class="btn btn-primary" href="/app">Choose Team</a>
+        </article>
+        <article class="plan">
+          <h3>Business</h3>
+          <div class="price">$199 <small>/ mo</small></div>
+          <ul>
+            <li>Up to 50 seats · 25 repos</li>
+            <li>Unlimited explains (fair use)</li>
+            <li>Priority support</li>
+          </ul>
+          <a class="btn btn-ghost" href="/app">Talk Business</a>
+        </article>
+      </div>
+    </section>
+
+    <footer>
+      <div>© 2026 CI Intelligence — portfolio SaaS foundation</div>
+      <div>
+        <a href="/legal/terms">Terms</a>
+        ·
+        <a href="/legal/privacy">Privacy</a>
+        ·
+        <a href="/app">App</a>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>

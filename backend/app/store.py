@@ -9,14 +9,21 @@ from typing import Any
 
 from .models import WorkflowRun
 
-DATA_DIR = Path(os.environ.get("DATA_DIR", Path(__file__).resolve().parents[2] / "data"))
-STORE_PATH = DATA_DIR / "store.json"
+_DEFAULT_DATA = Path(__file__).resolve().parents[2] / "data"
+
+
+def _data_dir() -> Path:
+    return Path(os.environ.get("DATA_DIR", _DEFAULT_DATA))
+
+
+def _store_path() -> Path:
+    return _data_dir() / "store.json"
 
 
 class Store:
     def __init__(self) -> None:
         self.runs: dict[str, WorkflowRun] = {}
-        DATA_DIR.mkdir(parents=True, exist_ok=True)
+        _data_dir().mkdir(parents=True, exist_ok=True)
 
     def clear(self) -> None:
         self.runs.clear()
@@ -34,18 +41,20 @@ class Store:
         return self.runs.get(run_id)
 
     def load(self) -> None:
-        if not STORE_PATH.exists():
+        path = _store_path()
+        if not path.exists():
             return
-        raw = json.loads(STORE_PATH.read_text())
+        raw = json.loads(path.read_text())
         for item in raw.get("runs", []):
             run = WorkflowRun.model_validate(item)
             self.runs[run.id] = run
 
     def _persist(self) -> None:
+        _data_dir().mkdir(parents=True, exist_ok=True)
         payload: dict[str, Any] = {
             "runs": [r.model_dump() for r in self.list_runs()],
         }
-        STORE_PATH.write_text(json.dumps(payload, indent=2))
+        _store_path().write_text(json.dumps(payload, indent=2))
 
 
 store = Store()
