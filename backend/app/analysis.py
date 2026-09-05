@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from collections import defaultdict
 from typing import Any
 
@@ -241,27 +242,91 @@ def explain_run(run: WorkflowRun, clusters: list[FailureSignature]) -> dict[str,
             parts.append(f"Associated with PR #{run.pr_number}.")
         summary = " ".join(parts)
 
-    ai = _stub_ai_explanation(run, evidence, related)
+    ai = _ai_explanation(run, evidence, related, summary)
+
+    # Quarantine recommendations for flaky tests in this run
+    quarantine = []
+    for test in run.tests:
+        if test.status == "flaky" or (
+            test.status == "failed" and any(
+                c for c in clusters if run.id in c.run_ids and test.name in (c.sample_message or "")
+            )
+        ):
+            quarantine.append(
+                {
+                    "test": test.name,
+                    "action": "quarantine_non_blocking",
+                    "reason": "Intermittent or signature-matched failure — keep running but do not block merges until stable",
+                    "owner_hint": run.actor or "unassigned",
+                }
+            )
 
     return {
         "run_id": run.id,
         "conclusion": run.conclusion,
         "deterministic_summary": summary,
         "evidence": evidence,
-        "ai_explanation": ai,
+        "ai_explanation": ai["text"],
+        "ai_provider": ai["provider"],
+        "ai_model": ai.get("model"),
         "related_signatures": related,
+        "quarantine_recommendations": quarantine,
     }
 
 
-def _stub_ai_explanation(
+def _ai_explanation(
+    run: WorkflowRun,
+    evidence: list[dict[str, Any]],
+    related: list[str],
+    summary: str,
+) -> dict[str, Any]:
+    from . import ollama_client
+
+    evidence_blob = json.dumps(
+        {
+            "summary": summary,
+            "run": {
+                "id": run.id,
+                "branch": run.branch,
+                "commit": run.commit_sha,
+                "pr": run.pr_number,
+                "conclusion": run.conclusion,
+            },
+            "evidence": evidence,
+            "related_signatures": related,
+        },
+        indent=2,
+    )
+    result = ollama_client.grounded_complete(
+        task=(
+            "Explain the likely CI failure cause and whether it may recur. "
+            "Recommend quarantine only if evidence shows flakiness. "
+            "Cite only evidence fields present below."
+        ),
+        evidence=evidence_blob,
+    )
+    if result.get("ok") and result.get("text"):
+        return {
+            "text": result["text"],
+            "provider": result.get("provider"),
+            "model": result.get("model"),
+        }
+    return {
+        "text": _fallback_explanation(run, evidence, related),
+        "provider": "fallback",
+        "model": None,
+    }
+
+
+def _fallback_explanation(
     run: WorkflowRun,
     evidence: list[dict[str, Any]],
     related: list[str],
 ) -> str:
-    """Stub AI narrative that only cites provided evidence (no invented causes)."""
+    """Deterministic narrative when Ollama is unavailable."""
     if run.conclusion == "success":
         return (
-            f"[AI stub] Run `{run.id}` succeeded. No failure evidence to explain. "
+            f"Run `{run.id}` succeeded. No failure evidence to explain. "
             f"Cited: run_id={run.id}, commit={run.commit_sha[:7]}."
         )
 
@@ -284,8 +349,6 @@ def _stub_ai_explanation(
 
     body = "\n".join(bullets) if bullets else "- No structured evidence rows."
     return (
-        f"[AI stub] Based on stored facts for run `{run.id}`, the failure appears tied to "
-        f"the evidence below. This is a template narrative — replace with a real model later.\n"
-        f"{body}\n"
+        f"Based on stored facts for run `{run.id}`:\n{body}\n"
         f"Evidence citations: {', '.join(cites)}."
     )
