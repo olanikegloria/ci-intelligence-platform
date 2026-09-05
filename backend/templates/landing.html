@@ -164,45 +164,6 @@
     @media (min-width: 800px) { .split { grid-template-columns: 1fr 1fr; } }
     .point h3 { margin: 0 0 0.4rem; font-size: 1.05rem; }
     .point p { margin: 0; color: var(--muted); line-height: 1.5; }
-    .pricing {
-      display: grid;
-      gap: 1rem;
-    }
-    @media (min-width: 860px) { .pricing { grid-template-columns: repeat(3, 1fr); } }
-    .plan {
-      padding: 1.35rem 1.25rem 1.45rem;
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      background: rgba(255,255,255,0.55);
-      backdrop-filter: blur(6px);
-      transition: border-color 0.25s ease, transform 0.25s ease;
-    }
-    .plan:hover { border-color: rgba(27,77,62,0.35); transform: translateY(-3px); }
-    .plan.featured {
-      background: var(--pine);
-      color: #f4faf7;
-      border-color: transparent;
-    }
-    .plan.featured p, .plan.featured li { color: rgba(244,250,247,0.82); }
-    .plan h3 { margin: 0; font-size: 1.1rem; }
-    .price {
-      margin: 0.7rem 0 0.85rem;
-      font-size: 2rem;
-      font-weight: 700;
-      letter-spacing: -0.04em;
-    }
-    .price small { font-size: 0.95rem; font-weight: 500; opacity: 0.75; }
-    .plan ul {
-      margin: 0 0 1.2rem;
-      padding-left: 1.1rem;
-      color: var(--muted);
-      line-height: 1.55;
-      font-size: 0.92rem;
-    }
-    .plan.featured .btn-primary {
-      background: #f4faf7;
-      color: var(--pine-deep);
-    }
     footer {
       border-top: 1px solid var(--line);
       padding: 1.5rem 0 2.5rem;
@@ -222,7 +183,7 @@
       <div class="brand">CI <span>Intelligence</span></div>
       <div class="nav-links">
         <a href="#problem">Problem</a>
-        <a href="#pricing">Pricing</a>
+        <a href="#how">How it works</a>
         <a href="/legal/terms">Terms</a>
         <a class="btn btn-primary" href="/app">Open app</a>
       </div>
@@ -235,7 +196,7 @@
         <p>Deterministic failure fingerprints and flaky-test scoring first. AI only narrates evidence you can verify.</p>
         <div class="cta-row">
           <a class="btn btn-primary" href="/app">Try the product</a>
-          <a class="btn btn-ghost" href="#pricing">See pricing</a>
+          <a class="btn btn-ghost" href="#how">How it works</a>
         </div>
       </div>
       <div class="hero-visual" aria-hidden="true">
@@ -267,60 +228,23 @@
       </div>
     </section>
 
-    <section class="block">
+    <section class="block" id="how">
       <h2>Solution: cluster → score → explain with citations</h2>
       <p class="lede">Ingest workflow runs, group failure signatures, surface flaky tests, then explain a run with a deterministic summary and evidence-backed narrative.</p>
       <div class="split">
         <div class="point">
-          <h3>Built for the buying conversation</h3>
-          <p>Orgs, API tokens, Free-tier metering (50 explains/mo), and a Stripe checkout stub so the upgrade path is demoable today.</p>
+          <h3>Multi-user ready</h3>
+          <p>Orgs and API tokens for shared triage. Sign up or use Bearer token <code>demo</code> for local eval.</p>
         </div>
         <div class="point">
-          <h3>Local eval in minutes</h3>
-          <p>Use Bearer token <code>demo</code> against protected APIs, or sign up for a Free org and walk the full commercial loop.</p>
+          <h3>Local in minutes</h3>
+          <p>Load sample fixtures, inspect clusters and flakes, and call <code>POST /explain/{run_id}</code> against a real dashboard.</p>
         </div>
-      </div>
-    </section>
-
-    <section class="block" id="pricing">
-      <h2>Simple plans for squads that ship</h2>
-      <p class="lede">Seat and repo limits match how reliability work is actually shared. See docs/PRICING.md in the repo for the full narrative.</p>
-      <div class="pricing">
-        <article class="plan">
-          <h3>Free</h3>
-          <div class="price">$0</div>
-          <ul>
-            <li>1 seat · 1 repo</li>
-            <li>50 explains / month</li>
-            <li>Clusters + flaky scoring</li>
-          </ul>
-          <a class="btn btn-ghost" href="/app">Start free</a>
-        </article>
-        <article class="plan featured">
-          <h3>Team</h3>
-          <div class="price">$49 <small>/ mo</small></div>
-          <ul>
-            <li>Up to 10 seats · 5 repos</li>
-            <li>2,000 explains / month</li>
-            <li>Email support</li>
-          </ul>
-          <a class="btn btn-primary" href="/app">Choose Team</a>
-        </article>
-        <article class="plan">
-          <h3>Business</h3>
-          <div class="price">$199 <small>/ mo</small></div>
-          <ul>
-            <li>Up to 50 seats · 25 repos</li>
-            <li>Unlimited explains (fair use)</li>
-            <li>Priority support</li>
-          </ul>
-          <a class="btn btn-ghost" href="/app">Talk Business</a>
-        </article>
       </div>
     </section>
 
     <footer>
-      <div>© 2026 CI Intelligence — portfolio SaaS foundation</div>
+      <div>© 2026 CI Intelligence — production-ready analysis tool</div>
       <div>
         <a href="/legal/terms">Terms</a>
         ·

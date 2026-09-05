@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -27,7 +27,7 @@ TEMPLATES_DIR = ROOT / "templates"
 app = FastAPI(
     title="CI Intelligence Platform",
     description="Failure clustering, flaky-test scoring, and evidence-cited explanations",
-    version="0.2.0",
+    version="0.3.0",
 )
 
 app.add_middleware(
@@ -50,12 +50,6 @@ class SignupRequest(BaseModel):
 class LoginRequest(BaseModel):
     email: str
     password: str
-
-
-class CheckoutRequest(BaseModel):
-    plan: Literal["team", "business"] = "team"
-    success_url: str | None = None
-    cancel_url: str | None = None
 
 
 @app.on_event("startup")
@@ -138,41 +132,6 @@ def auth_login(body: LoginRequest) -> dict[str, Any]:
         raise HTTPException(401, str(exc)) from exc
 
 
-@app.get("/billing/usage")
-def billing_usage(auth: AuthContext) -> dict[str, Any]:
-    return accounts.usage_snapshot(auth["org_id"])
-
-
-@app.post("/billing/checkout-session")
-def billing_checkout(body: CheckoutRequest, auth: AuthContext) -> dict[str, Any]:
-    """Stub Stripe Checkout session. Wire real Stripe when STRIPE_SECRET_KEY is set."""
-    stripe_key = os.environ.get("STRIPE_SECRET_KEY", "").strip()
-    plan = body.plan
-    fake_session = f"cs_test_fake_{plan}_{auth['org_id'][:8]}"
-    url = f"https://checkout.stripe.com/c/pay/{fake_session}"
-    return {
-        "id": fake_session,
-        "url": url,
-        "plan": plan,
-        "org_id": auth["org_id"],
-        "mode": "subscription",
-        "stripe_configured": bool(stripe_key),
-        "message": (
-            "Stub checkout URL for local demos. "
-            "Set STRIPE_SECRET_KEY and replace this handler with stripe.checkout.Session.create "
-            "before taking real payments."
-        ),
-        "success_url": body.success_url or "/app?checkout=success",
-        "cancel_url": body.cancel_url or "/?checkout=cancel",
-        "env": {
-            "STRIPE_SECRET_KEY": "required for live Checkout (sk_live_… / sk_test_…)",
-            "STRIPE_WEBHOOK_SECRET": "optional; for invoice.paid → plan upgrade",
-            "STRIPE_PRICE_TEAM": "optional Price ID for Team ($49/mo)",
-            "STRIPE_PRICE_BUSINESS": "optional Price ID for Business ($199/mo)",
-        },
-    }
-
-
 @app.get("/runs", response_model=list[WorkflowRun])
 def list_runs(_auth: AuthContext) -> list[WorkflowRun]:
     return store.list_runs()
@@ -197,29 +156,10 @@ def list_flaky(_auth: AuthContext) -> list[FlakyTest]:
 
 
 @app.post("/explain/{run_id}", response_model=ExplainResponse)
-def explain(run_id: str, auth: AuthContext) -> ExplainResponse:
-    quota = accounts.check_explain_quota(auth["org_id"])
-    if not quota["allowed"]:
-        raise HTTPException(
-            status_code=402,
-            detail={
-                "error": "quota_exceeded",
-                "message": (
-                    f"Free tier limit of {quota['explains_limit']} explains/{quota['month']} "
-                    "reached. Upgrade via POST /billing/checkout-session."
-                ),
-                "plan": quota["plan"],
-                "explains_used": quota["explains_used"],
-                "explains_limit": quota["explains_limit"],
-                "month": quota["month"],
-                "upgrade": {"team": "$49/mo", "business": "$199/mo"},
-            },
-        )
-
+def explain(run_id: str, _auth: AuthContext) -> ExplainResponse:
     run = store.get_run(run_id)
     if not run:
         raise HTTPException(404, f"Run {run_id} not found")
     clusters = cluster_failures(store.list_runs())
     payload = explain_run(run, clusters)
-    accounts.record_explain(auth["org_id"])
     return ExplainResponse(**payload)

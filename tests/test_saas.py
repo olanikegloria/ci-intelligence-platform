@@ -1,4 +1,4 @@
-"""Tests for auth, metering, and commercial stubs."""
+"""Tests for auth and protected analysis routes."""
 
 from __future__ import annotations
 
@@ -42,6 +42,8 @@ def test_landing_and_app_routes(client):
     r = client.get("/")
     assert r.status_code == 200
     assert b"CI Intelligence" in r.content
+    assert b"Pricing" not in r.content
+    assert b"$49" not in r.content
 
     r = client.get("/app")
     assert r.status_code == 200
@@ -76,45 +78,36 @@ def test_demo_token_and_ingest(client):
     assert body["deterministic_summary"]
 
 
-def test_signup_login_checkout_and_free_quota(client):
+def test_signup_login_and_explain(client):
     signup = client.post(
         "/auth/signup",
         json={
-            "email": "Buyer@Acme.Dev",
+            "email": "User@Acme.Dev",
             "password": "secret12",
             "org_name": "Acme Eng",
         },
     )
     assert signup.status_code == 200
     token = signup.json()["token"]
-    assert signup.json()["plan"] == "free"
+    assert "plan" not in signup.json()
     headers = {"Authorization": f"Bearer {token}"}
 
     login = client.post(
         "/auth/login",
-        json={"email": "buyer@acme.dev", "password": "secret12"},
+        json={"email": "user@acme.dev", "password": "secret12"},
     )
     assert login.status_code == 200
     assert login.json()["token"]
 
     client.post("/ingest/sample")
 
-    org_id = signup.json()["org_id"]
-    month = accounts.usage_snapshot(org_id)["month"]
-    accounts.orgs[org_id]["usage"] = {month: {"explains": 50}}
-    accounts._persist()
+    expl = client.post("/explain/run-1002", headers=headers)
+    assert expl.status_code == 200
+    assert expl.json()["run_id"] == "run-1002"
 
-    blocked = client.post("/explain/run-1002", headers=headers)
-    assert blocked.status_code == 402
-    detail = blocked.json()["detail"]
-    assert detail["error"] == "quota_exceeded"
-
-    checkout = client.post(
+    assert client.get("/billing/usage", headers=headers).status_code == 404
+    assert client.post(
         "/billing/checkout-session",
         headers=headers,
         json={"plan": "team"},
-    )
-    assert checkout.status_code == 200
-    payload = checkout.json()
-    assert payload["url"].startswith("https://checkout.stripe.com/")
-    assert "STRIPE_SECRET_KEY" in payload["env"]
+    ).status_code == 404

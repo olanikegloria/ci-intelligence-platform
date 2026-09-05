@@ -97,7 +97,6 @@
       <a href="/" style="color:var(--muted);align-self:center;font-size:0.9rem;text-decoration:none">← Marketing</a>
       <button type="button" onclick="ingestSample()">Reload sample fixtures</button>
       <button type="button" class="secondary" onclick="location.reload()">Refresh</button>
-      <button type="button" class="secondary" onclick="showUsage()">Usage</button>
       <label style="align-self:center;color:var(--muted);font-size:0.85rem">
         API token
         <input id="api-token" type="text" value="demo" style="margin-left:0.35rem;background:#0c121a;border:1px solid var(--border);color:var(--text);border-radius:4px;padding:0.25rem 0.45rem;width:9rem" />
@@ -197,15 +196,6 @@
       const data = await res.json();
       alert('Ingested ' + data.ingested + ' runs');
       location.reload();
-    }
-    async function showUsage() {
-      const res = await fetch('/billing/usage', { headers: authHeaders() });
-      const data = await res.json();
-      if (!res.ok) {
-        alert('Usage failed: ' + res.status + ' ' + JSON.stringify(data));
-        return;
-      }
-      alert('Plan ' + data.plan + ' · explains ' + data.explains_used + '/' + (data.explains_limit ?? '∞') + ' (' + data.month + ')');
     }
     function selectRun(id) {
       document.querySelectorAll('tr.clickable').forEach(el => el.classList.remove('selected'));

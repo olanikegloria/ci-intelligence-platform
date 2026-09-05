@@ -1,4 +1,4 @@
-"""Org / user / token / usage store (JSON under data/)."""
+"""Org / user / token store (JSON under data/)."""
 
 from __future__ import annotations
 
@@ -25,24 +25,9 @@ DEMO_TOKEN = "demo"
 DEMO_ORG_ID = "org_demo"
 DEMO_EMAIL = "demo@localhost"
 
-# Plan limits: explains per calendar month (None = unlimited)
-PLAN_EXPLAIN_LIMITS: dict[str, int | None] = {
-    "free": 50,
-    "team": 2000,
-    "business": None,
-}
-
-PLAN_SEATS: dict[str, int] = {"free": 1, "team": 10, "business": 50}
-PLAN_REPOS: dict[str, int] = {"free": 1, "team": 5, "business": 25}
-
 
 def _utcnow() -> str:
     return datetime.now(timezone.utc).isoformat()
-
-
-def _month_key(when: datetime | None = None) -> str:
-    dt = when or datetime.now(timezone.utc)
-    return f"{dt.year:04d}-{dt.month:02d}"
 
 
 def hash_password(password: str, salt: str | None = None) -> str:
@@ -86,9 +71,7 @@ class AccountsStore:
             self.orgs[DEMO_ORG_ID] = {
                 "id": DEMO_ORG_ID,
                 "name": "Demo Org",
-                "plan": "business",
                 "created_at": _utcnow(),
-                "usage": {},
             }
         if DEMO_EMAIL not in self.users:
             self.users[DEMO_EMAIL] = {
@@ -127,9 +110,7 @@ class AccountsStore:
         self.orgs[org_id] = {
             "id": org_id,
             "name": org_name.strip(),
-            "plan": "free",
             "created_at": now,
-            "usage": {},
         }
         self.users[key] = {
             "email": key,
@@ -148,7 +129,6 @@ class AccountsStore:
             "email": key,
             "org_id": org_id,
             "org_name": org_name.strip(),
-            "plan": "free",
             "token": token,
         }
 
@@ -171,7 +151,6 @@ class AccountsStore:
             "email": key,
             "org_id": user["org_id"],
             "org_name": org["name"],
-            "plan": org.get("plan", "free"),
             "token": token,
         }
 
@@ -189,47 +168,7 @@ class AccountsStore:
             "user_email": entry["user_email"],
             "org_id": entry["org_id"],
             "org": org,
-            "plan": org.get("plan", "free"),
         }
-
-    def usage_snapshot(self, org_id: str) -> dict[str, Any]:
-        org = self.orgs[org_id]
-        plan = org.get("plan", "free")
-        month = _month_key()
-        used = int(org.get("usage", {}).get(month, {}).get("explains", 0))
-        limit = PLAN_EXPLAIN_LIMITS.get(plan, PLAN_EXPLAIN_LIMITS["free"])
-        return {
-            "org_id": org_id,
-            "plan": plan,
-            "month": month,
-            "explains_used": used,
-            "explains_limit": limit,
-            "seats_limit": PLAN_SEATS.get(plan, 1),
-            "repos_limit": PLAN_REPOS.get(plan, 1),
-        }
-
-    def check_explain_quota(self, org_id: str) -> dict[str, Any]:
-        snap = self.usage_snapshot(org_id)
-        limit = snap["explains_limit"]
-        if limit is not None and snap["explains_used"] >= limit:
-            return {**snap, "allowed": False}
-        return {**snap, "allowed": True}
-
-    def record_explain(self, org_id: str) -> dict[str, Any]:
-        org = self.orgs[org_id]
-        month = _month_key()
-        usage = org.setdefault("usage", {})
-        bucket = usage.setdefault(month, {"explains": 0})
-        bucket["explains"] = int(bucket.get("explains", 0)) + 1
-        self._persist()
-        return self.usage_snapshot(org_id)
-
-    def set_plan(self, org_id: str, plan: str) -> dict[str, Any]:
-        if plan not in PLAN_EXPLAIN_LIMITS:
-            raise ValueError(f"Unknown plan: {plan}")
-        self.orgs[org_id]["plan"] = plan
-        self._persist()
-        return self.usage_snapshot(org_id)
 
 
 accounts = AccountsStore()
