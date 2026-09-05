@@ -1,37 +1,96 @@
 # CI Intelligence Platform
 
-**Status:** Phase 0 — planning only. Do not implement until proposal is accepted.  
+**Status:** Runnable MVP scaffold  
 **Folder:** `01-ci-intelligence-platform`
+
+Explain *why* CI failed and whether it will happen again — deterministic fingerprinting and clustering first, AI explanation second (stub that cites evidence).
 
 ---
 
-## Problem
+## What works in this MVP
 
-Engineering teams struggle to answer: **why did this pipeline fail, and is it likely to happen again?** Existing dashboards show status; they rarely explain causality, recurrence, or flakiness with enough structure to act.
+- Ingest sample GitHub Actions–like workflow runs (success, failures, flakes)
+- List runs, cluster failure signatures (count / first seen / last seen)
+- Flaky-test scoring heuristics (same-SHA pass+fail, retry recovery)
+- `POST /explain/{run_id}` — deterministic summary + stub AI narrative with citations
+- Dashboard UI at `/` (Jinja template served by FastAPI)
 
-## Target users
+## Stack
 
-Software engineers, DevOps/platform engineers, engineering managers.
+| Layer | Choice |
+|-------|--------|
+| API + UI | Python FastAPI + Jinja |
+| Store | In-memory + JSON file (`data/store.json`) |
+| Tests | pytest |
+| Infra | Docker Compose |
 
-## Solution (intent)
+## Quick start (local)
 
-Ingest GitHub Actions data (runs, jobs, steps, tests, logs, PRs, commits). Run deterministic analysis for failure clustering, timelines, and flaky-test scoring. Use AI on top of that data to explain failures, summarise logs, and answer questions about pipeline history — not to replace the analysis engine.
+```bash
+cd 01-ci-intelligence-platform
+python -m venv .venv
+source .venv/bin/activate
+pip install -r backend/requirements.txt
+export PYTHONPATH=backend
+export FIXTURES_DIR=$PWD/fixtures
+export DATA_DIR=$PWD/data
+uvicorn app.main:app --reload --port 8001
+```
 
-## Tech stack (planned)
+Open http://localhost:8001/
 
-- Frontend: Next.js, TypeScript, React, Tailwind
-- Backend: Python / FastAPI
-- Database: PostgreSQL
-- Jobs: Redis + worker
-- Infra: Docker, GitHub Actions
-- AI: Ollama / open models via a provider interface
+```bash
+# API checks
+curl -X POST http://localhost:8001/ingest/sample
+curl http://localhost:8001/runs | head
+curl http://localhost:8001/failures
+curl http://localhost:8001/flaky-tests
+curl -X POST http://localhost:8001/explain/run-1002
+```
+
+### Tests
+
+```bash
+cd 01-ci-intelligence-platform
+source .venv/bin/activate
+pip install -r backend/requirements.txt
+PYTHONPATH=backend pytest tests/ -q
+```
+
+## Docker
+
+```bash
+cd 01-ci-intelligence-platform
+docker compose up --build
+```
+
+UI/API: http://localhost:8001/
+
+## Endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/` | Dashboard |
+| POST | `/ingest/sample` | Load fixture runs |
+| GET | `/runs` | List workflow runs |
+| GET | `/failures` | Clustered failure signatures |
+| GET | `/flaky-tests` | Flaky score heuristics |
+| POST | `/explain/{run_id}` | Deterministic + stub AI explanation |
+
+## Layout
+
+```text
+backend/app/     FastAPI, models, fingerprinting, analysis, store
+backend/templates/  Dashboard HTML
+fixtures/        sample_runs.json
+tests/           fingerprint + clustering pytest
+frontend/        UI is served by FastAPI at / (see note below)
+```
+
+The `frontend/` folder is reserved for a future Next.js app; the MVP ships a working dashboard from FastAPI for a single-process demo.
 
 ## Docs
 
-- [PROPOSAL.md](./PROPOSAL.md) — full proposal for review
-- [ARCHITECTURE.md](./ARCHITECTURE.md) — system design
-- [INTERVIEW.md](./INTERVIEW.md) — interview stub
-
-## Setup
-
-Not runnable yet. Scaffold only.
+- [PROPOSAL.md](./PROPOSAL.md)
+- [ARCHITECTURE.md](./ARCHITECTURE.md)
+- [INTERVIEW.md](./INTERVIEW.md)
