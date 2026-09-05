@@ -256,7 +256,7 @@ def explain_run(run: WorkflowRun, clusters: list[FailureSignature]) -> dict[str,
                 {
                     "test": test.name,
                     "action": "quarantine_non_blocking",
-                    "reason": "Intermittent or signature-matched failure — keep running but do not block merges until stable",
+                    "reason": "Intermittent or signature-matched failure - keep running but do not block merges until stable",
                     "owner_hint": run.actor or "unassigned",
                 }
             )

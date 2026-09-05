@@ -3,122 +3,190 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>CI Intelligence — Know why CI failed</title>
+  <title>CI Intelligence - Know why CI failed</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #0c0e12;
-      --panel: #141820;
-      --text: #e8eaef;
-      --muted: #8b93a7;
-      --accent: #3d9a7a;
-      --accent-hover: #4aaf8c;
-      --border: rgba(232, 234, 239, 0.08);
-      --border-strong: rgba(232, 234, 239, 0.14);
+      --bg: #070908;
+      --panel: #0c100e;
+      --text: #c8f0d4;
+      --muted: #5a8a6a;
+      --accent: #39ff88;
+      --accent-dim: rgba(57, 255, 136, 0.15);
+      --border: rgba(57, 255, 136, 0.22);
+      --fail: #ff6b6b;
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: "DM Sans", system-ui, sans-serif;
+      font-family: "JetBrains Mono", ui-monospace, monospace;
       color: var(--text);
-      background:
-        radial-gradient(ellipse 90% 55% at 70% -15%, rgba(61, 154, 122, 0.12), transparent 55%),
-        radial-gradient(ellipse 60% 40% at -10% 60%, rgba(61, 154, 122, 0.05), transparent 50%),
-        var(--bg);
+      background-color: var(--bg);
+      background-image:
+        radial-gradient(rgba(57, 255, 136, 0.06) 1px, transparent 1px),
+        repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 2px,
+          rgba(0, 0, 0, 0.12) 2px,
+          rgba(0, 0, 0, 0.12) 3px
+        );
+      background-size: 18px 18px, 100% 3px;
       min-height: 100vh;
       -webkit-font-smoothing: antialiased;
     }
     a { color: inherit; }
-    .wrap { width: min(960px, calc(100% - 2.5rem)); margin: 0 auto; }
+    .wrap { width: min(1100px, calc(100% - 2rem)); margin: 0 auto; }
     nav {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 1.5rem 0;
+      padding: 1.25rem 0;
       border-bottom: 1px solid var(--border);
     }
     .brand {
       font-weight: 700;
-      letter-spacing: -0.03em;
-      font-size: 1.05rem;
+      font-size: 0.95rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
     }
     .brand span { color: var(--accent); }
-    .nav-links { display: flex; gap: 1.25rem; align-items: center; font-size: 0.9rem; }
-    .nav-links a { text-decoration: none; color: var(--muted); transition: color 0.15s ease; }
-    .nav-links a:hover { color: var(--text); }
+    .nav-links { display: flex; gap: 1.25rem; align-items: center; font-size: 0.8rem; }
+    .nav-links a { text-decoration: none; color: var(--muted); }
+    .nav-links a:hover { color: var(--accent); }
     .btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
       text-decoration: none;
-      border-radius: 8px;
-      padding: 0.7rem 1.2rem;
+      border-radius: 0;
+      padding: 0.65rem 1.1rem;
       font-weight: 600;
-      font-size: 0.925rem;
+      font-size: 0.8rem;
+      font-family: inherit;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
       border: 1px solid transparent;
-      transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+      transition: background 0.12s ease, color 0.12s ease, box-shadow 0.12s ease;
     }
-    .btn:hover { transform: translateY(-1px); }
-    .btn-primary { background: var(--accent); color: #0a0c10; }
-    .btn-primary:hover { background: var(--accent-hover); }
-    .btn-ghost { background: transparent; border-color: var(--border-strong); color: var(--text); }
-    .btn-ghost:hover { border-color: var(--muted); }
+    .btn-primary {
+      background: transparent;
+      color: var(--accent);
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px transparent;
+    }
+    .btn-primary:hover {
+      background: var(--accent-dim);
+      box-shadow: 0 0 12px rgba(57, 255, 136, 0.25);
+    }
+    .btn-ghost {
+      background: transparent;
+      border-color: var(--border);
+      color: var(--text);
+    }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
     .hero {
-      padding: 4.5rem 0 3.5rem;
-      animation: fadeup 0.7s ease both;
+      padding: 3.5rem 0 3rem;
+      display: grid;
+      gap: 2rem;
+      align-items: stretch;
     }
-    .hero .product {
-      font-size: 0.75rem;
+    @media (min-width: 860px) {
+      .hero { grid-template-columns: 1fr 1.05fr; gap: 2.5rem; }
+    }
+    .product {
+      font-size: 0.7rem;
       font-weight: 600;
-      letter-spacing: 0.16em;
+      letter-spacing: 0.18em;
       text-transform: uppercase;
       color: var(--accent);
       margin-bottom: 1rem;
     }
     .hero h1 {
       margin: 0 0 1rem;
-      font-size: clamp(2.35rem, 5.5vw, 3.5rem);
-      line-height: 1.08;
-      letter-spacing: -0.045em;
+      font-size: clamp(1.65rem, 3.8vw, 2.35rem);
+      line-height: 1.2;
+      letter-spacing: -0.02em;
       font-weight: 700;
-      max-width: 14ch;
+      max-width: 18ch;
+      color: #e8ffe8;
     }
     .hero .lede {
       margin: 0 0 1.75rem;
       color: var(--muted);
-      font-size: 1.1rem;
-      line-height: 1.55;
-      max-width: 42ch;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      max-width: 40ch;
     }
     .cta-row { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+    .log-panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 280px;
+      box-shadow: inset 0 0 40px rgba(57, 255, 136, 0.04);
+    }
+    .log-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.55rem 0.85rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .log-bar .dot {
+      width: 7px; height: 7px;
+      background: var(--accent);
+      box-shadow: 0 0 6px var(--accent);
+    }
+    .log-body {
+      flex: 1;
+      padding: 0.9rem 1rem;
+      font-size: 0.75rem;
+      line-height: 1.7;
+      color: var(--muted);
+      overflow: auto;
+    }
+    .log-body .ok { color: var(--accent); }
+    .log-body .fail { color: var(--fail); }
+    .log-body .ts { color: #3a5a44; }
     .features {
-      padding: 2.5rem 0 4rem;
+      padding: 2rem 0 3.5rem;
       border-top: 1px solid var(--border);
       display: grid;
-      gap: 1.25rem;
+      gap: 0;
     }
     @media (min-width: 720px) {
-      .features { grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+      .features { grid-template-columns: repeat(3, 1fr); }
     }
     .feature {
       padding: 1.35rem 1.25rem;
-      background: var(--panel);
+      background: transparent;
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-radius: 0;
+      margin: 0 -1px -1px 0;
     }
     .feature h3 {
       margin: 0 0 0.5rem;
-      font-size: 0.95rem;
+      font-size: 0.8rem;
       font-weight: 600;
-      letter-spacing: -0.01em;
+      color: var(--accent);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
     }
     .feature p {
       margin: 0;
       color: var(--muted);
-      font-size: 0.9rem;
-      line-height: 1.5;
+      font-size: 0.8rem;
+      line-height: 1.55;
     }
     footer {
       border-top: 1px solid var(--border);
@@ -128,14 +196,11 @@
       gap: 1rem;
       justify-content: space-between;
       color: var(--muted);
-      font-size: 0.85rem;
+      font-size: 0.75rem;
+      letter-spacing: 0.04em;
     }
     footer a { color: var(--muted); text-decoration: none; }
-    footer a:hover { color: var(--text); }
-    @keyframes fadeup {
-      from { opacity: 0; transform: translateY(12px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    footer a:hover { color: var(--accent); }
   </style>
 </head>
 <body>
@@ -150,13 +215,26 @@
     </nav>
 
     <header class="hero">
-      <div class="product">CI Intelligence</div>
-      <h1>Know why CI failed — and if it will again.</h1>
-      <p class="lede">Deterministic failure fingerprints and flaky-test scoring first. AI only narrates evidence you can verify.</p>
-      <div class="cta-row">
-        <a class="btn btn-primary" href="/app">Open app</a>
-        <a class="btn btn-ghost" href="#features">See features</a>
+      <div>
+        <div class="product">CI Intelligence</div>
+        <h1>Know why CI failed - and if it will again.</h1>
+        <p class="lede">Deterministic failure fingerprints and flaky-test scoring first. AI only narrates evidence you can verify.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="/app">Open app</a>
+          <a class="btn btn-ghost" href="#features">See features</a>
+        </div>
       </div>
+      <aside class="log-panel" aria-hidden="true">
+        <div class="log-bar"><span class="dot"></span> ci-console / run #4821</div>
+        <div class="log-body">
+          <div><span class="ts">19:42:01</span> <span class="ok">✓</span> fingerprint match: flake/timeout-jwt</div>
+          <div><span class="ts">19:42:01</span> same-SHA contradiction: 3 / 12</div>
+          <div><span class="ts">19:42:02</span> <span class="fail">✗</span> cluster: auth.middleware.expire</div>
+          <div><span class="ts">19:42:02</span> recurrence score: 0.87</div>
+          <div><span class="ts">19:42:03</span> <span class="ok">✓</span> explain: citing fingerprints only</div>
+          <div><span class="ts">19:42:03</span> awaiting operator confirm_</div>
+        </div>
+      </aside>
     </header>
 
     <section class="features" id="features">
@@ -170,7 +248,7 @@
       </div>
       <div class="feature">
         <h3>Evidence-cited explain</h3>
-        <p>Deterministic summary first; AI narrative cites fingerprints only — no free-form guesswork.</p>
+        <p>Deterministic summary first; AI narrative cites fingerprints only - no free-form guesswork.</p>
       </div>
     </section>
 
